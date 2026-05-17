@@ -1,0 +1,90 @@
+_schema-version: 3.3.0
+ID: CAPMAPP
+version: 1.0.0
+description: "My First Life CAP project."
+parameters:
+  enable-parallel-deployments: true
+build-parameters:
+  before-all:
+    - builder: custom
+      commands:
+        - npm ci
+        - npx cds build --production
+modules:
+
+  - name: CAPMAPP-ui
+    type: nodejs
+    path: app
+    parameters:
+      instances: 1
+      buildpack: nodejs_buildpack
+    build-parameters:
+      builder: npm-ci
+    requires:
+      - name: CAPMAPP-auth
+      - name: srv-api
+        group: destinations
+        properties:
+          name: srv-api
+          strictSSL: true
+          forwardAuthToken: true
+          url: '~{srv-url}'
+
+##end of code
+
+  - name: CAPMAPP-srv
+    type: nodejs
+    path: gen/srv
+    parameters:
+      instances: 1
+      buildpack: nodejs_buildpack
+    build-parameters:
+      builder: npm-ci
+    provides:
+      - name: srv-api # required by consumers of CAP services (e.g. approuter)
+        properties:
+          srv-url: ${default-url}
+    requires:
+      - name: CAPMAPP-db
+      - name: CAPMAPP-auth
+
+  - name: CAPMAPP-db-deployer
+    type: hdb
+    path: gen/db
+    parameters:
+      buildpack: nodejs_buildpack
+    requires:
+      - name: CAPMAPP-db
+
+resources:
+  - name: CAPMAPP-db
+    type: com.sap.xs.hdi-container
+    parameters:
+      service: hana
+      service-plan: hdi-shared
+  - name: CAPMAPP-auth
+    type: org.cloudfoundry.managed-service
+    parameters:
+      service: xsuaa
+      service-plan: application
+      path: ./xs-security.json
+      config:
+        xsappname: CAPMAPP-${org}-${space}
+        tenant-mode: dedicated
+        oauth2-configuration:
+          credential-types:
+            - "binding-secret"
+            - "x509"
+        role-collections:
+          - name: 'Viewer (CAPMAPP ${org}-${space})'
+            description: 'generated'
+            role-template-references:
+              - '$XSAPPNAME.Viewer'
+          - name: 'Editor (CAPMAPP ${org}-${space})'
+            description: 'generated'
+            role-template-references:
+              - '$XSAPPNAME.Editor'
+          - name: 'userattributes (CAPMAPP ${org}-${space})'
+            description: 'generated'
+            role-template-references:
+              - '$XSAPPNAME.userattributes'

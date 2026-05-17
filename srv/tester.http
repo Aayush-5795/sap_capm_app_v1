@@ -1,0 +1,158 @@
+### Test Client to the server 
+
+http://localhost:4004/odata/v4/MyService/aayush(name='Aayush')
+
+
+###
+http://localhost:4004/odata/v4/CatalogService
+
+### Metadata Document
+http://localhost:4004/odata/v4/CatalogService/$metadata
+
+### Employee data 
+http://localhost:4004/odata/v4/CatalogService/EmployeeSet
+Authorization: Basic aayush:admin
+###
+http://localhost:4004/odata/v4/CatalogService/EmployeeSet/02BD2137-0890-1EEA-A6C2-BB55C19847FB
+
+### selected column data
+http://localhost:4004/odata/v4/CatalogService/EmployeeSet?$select=ID,nameFirst,nameLast,sex,email
+
+### count data
+http://localhost:4004/odata/v4/CatalogService/EmployeeSet/$count
+
+### Löad data chunk by chunk - pagination
+
+http://localhost:4004/odata/v4/CatalogService/EmployeeSet?$top=2&$skip=2
+
+####
+http://localhost:4004/odata/v4/CatalogService/EmployeeSet/02BD2137-0890-1EEA-A6C2-BB55C197E7FB
+
+###
+
+http://localhost:4004/odata/v4/CatalogService/EmployeeSet(ID='02BD2137-0890-1EEA-A6C2-BB55C197E7FB',sex='M')
+
+### eq equal nq notequal ge greaterthanEq le lessthaneq lt lessthank gt greaterthank
+
+http://localhost:4004/odata/v4/CatalogService/EmployeeSet?$filter=bankName eq 'My Bank of San Francisco'
+
+### pattern match
+http://localhost:4004/odata/v4/CatalogService/EmployeeSet?$filter=contains(nameFirst,'Su')
+
+
+### Sorting data orderby asc = ascending desc = descending
+
+http://localhost:4004/odata/v4/CatalogService/EmployeeSet?$orderby=salaryAmount asc&$top=3
+
+
+### Purchase Order data
+http://localhost:4004/odata/v4/CatalogService/PurchaseOrderSet
+
+### Purchase Order data with id 
+http://localhost:4004/odata/v4/CatalogService/PurchaseOrderSet/74867AD200E41EDBA5D8B0C98DC2C052
+### Purchase Order data with id it shows all items (Loose coupling)
+http://localhost:4004/odata/v4/CatalogService/PurchaseOrderSet/74867AD200E41EDBA5D8B0C98DC2E052/Items
+
+###  Purchase order header +  Items together 
+http://localhost:4004/odata/v4/CatalogService/PurchaseOrderSet/74867AD200E41EDBA5D8B0C98DC2C052?$expand=Items
+
+
+####
+http://localhost:4004/odata/v4/CDSService/ProductSet/74867AD200E41EDBA5D8B06B26EC6052?$expand=To_Items
+
+
+#### child data also filter with v4
+http://localhost:4004/odata/v4/CDSService/ProductSet/74867AD200E41EDBA5D8B06B26EC6052?$expand=To_Items($filter=TaxAmount le 500)
+
+### Create Operation to insert data 
+POST http://localhost:4004/odata/v4/CatalogService/EmployeeSet
+Content-Type: application/json
+
+{
+      "nameFirst": "Aayush",
+      "nameMiddle": null,
+      "nameLast": "Pandit",
+      "nameInitials": null,
+      "sex": "M",
+      "language": "E",
+      "phoneNumber": null,
+      "loginName": "aayush2756",
+      "email": "Aayush@itelo.info",
+      "currency_code": "EUR",
+      "salaryAmount": 10000001,
+      "accountNumber": "142584152",
+      "bankID": "5145494",
+      "bankName": "My Bank of Germany"
+}
+
+### Create Operation to insert data 
+PATCH  http://localhost:4004/odata/v4/CatalogService/EmployeeSet/df7fa373-c0ff-4e5f-b2eb-9902f55c8987
+Content-Type: application/json
+
+{
+      "salaryAmount": 9990999
+}
+
+### Delete data 
+
+DELETE http://localhost:4004/odata/v4/CatalogService/EmployeeSet/df7fa373-c0ff-4e5f-b2eb-9902f55c8987
+  
+### Purchase Order data with id 
+POST http://localhost:4004/odata/v4/CatalogService/PurchaseOrderSet
+Content-Type: application/json
+
+{
+  "CURRENCY_code": "EUR",
+  "GROSS_AMOUNT": 18142.74,
+  "NET_AMOUNT": 15246,
+  "TAX_AMOUNT": 2896.74,
+  "NODE_KEY": "74867AD200E41EDBA5D8B0C96",
+  "PO_ID": "300005555",
+  "PARTNER_GUID_NODE_KEY": "74867AD200E41EDBA5D8B068666",
+  "LIFECYCLE_STATUS": "N",
+  "OVERALL_STATUS": "P",
+  "NOTE": null,
+  "Items": [
+    {
+      "CURRENCY_code": "DKK",
+      "GROSS_AMOUNT": 2424.03,
+      "NET_AMOUNT": 2037,
+      "TAX_AMOUNT": 387.03,
+      "NODE_KEY": "74867AD200E41EDBA5D8B0C6061",
+      "PO_ITEM_POS": 10,
+      "PRODUCT_GUID_NODE_KEY": "74867AD200E41EDBA5D8B06B26F64052"
+    },
+    {
+      "CURRENCY_code": "DKK",
+      "GROSS_AMOUNT": 1783.81,
+      "NET_AMOUNT": 1499,
+      "TAX_AMOUNT": 284.81,
+      "NODE_KEY": "74867AD200E41EDBA5D8B0CB6062",
+      "PO_ITEM_POS": 20,
+      "PRODUCT_GUID_NODE_KEY": "74867AD200E41EDBA5D8B06B26F0A052"
+    }
+  ]
+}
+
+### Testing the function 
+http://localhost:4004/odata/v4/CatalogService/getLargestOrder()
+
+
+#### Testing actions  ---- First Get Item
+
+http://localhost:4004/odata/v4/CatalogService/PurchaseOrderSet/74867AD200E41EDBA5D8B0C98DC2C052/Items/74867AD200E41EDBA5D8B0CBD35DC052
+
+#### Testing actions  Now Boost the gross amount
+
+POST http://localhost:4004/odata/v4/CatalogService/PurchaseOrderSet/74867AD200E41EDBA5D8B0C98DC2C052/boost
+Content-Type: application/json
+
+{}
+
+
+### Testing the function  for v2
+http://localhost:4004/odata/v2/CatalogService/EmployeeSet
+
+### Product set 
+
+http://localhost:4004/odata/v4/CDSService/ProductSet
