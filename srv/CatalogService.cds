@@ -13,7 +13,7 @@ service CatalogService @(path: 'CatalogService', requires: 'authenticated-user')
 
     //  /@Capabilities : { Deletable : false }
     entity PurchaseOrderSet @(
-                            // @(restrict: [
+                            // restrict: [
                             //     { grant: [ 'READ' ], to: 'Viewer' },
                             //     { grant: [ 'WRITE' , 'DELETE' ], to: 'Editor' }
                             // ],
