@@ -5,13 +5,14 @@ using { aayush.db.master, aayush.db.transaction } from '../db/datamodel';
 service CatalogService @(path: 'CatalogService', requires: 'authenticated-user') {
 
     entity EmployeeSet @(restrict: [
-        
+
                                 {grant: ['READ'], to: 'Viewer',
                                 where: 'bankName = $user.spiderman'},
                                 { grant: ['WRITE','DELETE'], to: 'Editor'}
                             ])
                              as projection on master.employees;
 
+    
     //  /@Capabilities : { Deletable : false }
     entity PurchaseOrderSet @(
                             // restrict: [
