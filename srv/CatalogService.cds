@@ -6,19 +6,18 @@ service CatalogService @(path: 'CatalogService', requires: 'authenticated-user')
 
     entity EmployeeSet @(restrict: [
 
-                                {grant: ['READ'], to: 'Viewer',
+                                {grant: ['READ'], to: 'Display',
                                 where: 'bankName = $user.spiderman'},
-                                { grant: ['WRITE','DELETE'], to: 'Editor'}
+                                { grant: ['WRITE','DELETE'], to: 'Edit'}
                             ])
                              as projection on master.employees;
 
     
     //  /@Capabilities : { Deletable : false }
-    entity PurchaseOrderSet @(
-                            // restrict: [
-                            //     { grant: [ 'READ' ], to: 'Viewer' },
-                            //     { grant: [ 'WRITE' , 'DELETE' ], to: 'Editor' }
-                            // ],
+    entity PurchaseOrderSet @(restrict: [
+                                 { grant: [ 'READ' ], to: 'Display' },
+                                 { grant: [ 'WRITE' , 'DELETE' ], to: 'Edit' }
+                             ],
                                 odata.draft.enabled: true,
                                 Common.DefaultValuesFunction: 'getDefaultvalue') as projection on transaction.purchaseorder{
         *,
