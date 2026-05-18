@@ -6,8 +6,8 @@ service CatalogService @(path: 'CatalogService', requires: 'authenticated-user')
 
     entity EmployeeSet @(restrict: [
 
-                                {grant: ['READ'], to: 'Display',
-                                where: 'bankName = $user.spiderman'},
+                                {grant: ['READ'], to: 'Display'},
+                               // where: 'bankName = $user.spiderman'},
                                 { grant: ['WRITE','DELETE'], to: 'Edit'}
                             ])
                              as projection on master.employees;
