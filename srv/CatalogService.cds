@@ -6,15 +6,16 @@ service CatalogService @(path: 'CatalogService', requires: 'authenticated-user')
 
     entity EmployeeSet @(restrict: [
 
-                                {grant: ['READ'], to: 'Display'},
-                               // where: 'bankName = $user.spiderman'},
+                                {grant: ['READ'], to: 'Display',
+                                where: 'bankName = $user.spiderman'},
                                 { grant: ['WRITE','DELETE'], to: 'Edit'}
                             ])
                              as projection on master.employees;
 
     
     //  /@Capabilities : { Deletable : false }
-    entity PurchaseOrderSet @(restrict: [
+    entity PurchaseOrderSet @(
+                        restrict : [
                                  { grant: [ 'READ' ], to: 'Display' },
                                  { grant: [ 'WRITE' , 'DELETE' ], to: 'Edit' }
                              ],
