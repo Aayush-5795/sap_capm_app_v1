@@ -1,4 +1,5 @@
 const cds = require('@sap/cds')
+const { UPDATE } = require('@sap/cds/lib/ql/cds-ql')
 
 module.exports = class CatalogService extends cds.ApplicationService { init() {
 
@@ -97,6 +98,26 @@ module.exports = class CatalogService extends cds.ApplicationService { init() {
       
     }
   });
+
+
+
+
+  this.on('changeStatus', PurchaseOrderSet ,async(req)=>{
+     console.log('Inside changeStatus action', req.params[0])
+     const PurchaseId = req.params[0].ID;
+     const tx = cds.tx(req);
+     await tx.update(PurchaseOrderSet).with({
+      OVERALL_STATUS : 'D',
+      LIFECYCLE_STATUS : 'D'
+     }).where({ID: PurchaseId});
+  });
+
+    this.on('offerPrice',async()=>{
+      await UPDATE(PurchaseItemSet).set({ GROSS_AMOUNT : {'*=': 0.9}});
+    });
+
+
+
 
   return super.init()
 }}

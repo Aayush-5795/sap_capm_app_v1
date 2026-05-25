@@ -1,0 +1,9 @@
+.sapUxAPObjectPageHeaderIdentifier .sapFAvatar {
+    width: 6rem !important;
+    height: 6rem !important;
+}
+
+.sapUxAPObjectPageHeaderIdentifier .sapFAvatarImage {
+    width: 100% !important;
+    height: 100% !important;
+}

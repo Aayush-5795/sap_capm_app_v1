@@ -18,6 +18,8 @@ modules:
     parameters:
       instances: 1
       buildpack: nodejs_buildpack
+    properties:
+      TENANT_HOST_PATTERN: "^(.*)-${default-uri}"
     build-parameters:
       builder: npm-ci
     requires:
@@ -29,8 +31,19 @@ modules:
           strictSSL: true
           forwardAuthToken: true
           url: '~{srv-url}'
+      - name: mtx-api
+        group: destinations
+        properties:
+          name: mtx-api # must be used in xs-app.json as well
+          url: ~{mtx-url}
+      - name: CAPMAPP-auth
+    provides:
+      - name: app-api
+        properties:
+          app-protocol: ${protocol}
+          app-uri: ${default-uri}
 
-##end of code
+  ##end of code
 
   - name: CAPMAPP-srv
     type: nodejs
@@ -45,23 +58,42 @@ modules:
         properties:
           srv-url: ${default-url}
     requires:
-      - name: CAPMAPP-db
       - name: CAPMAPP-auth
-
-  - name: CAPMAPP-db-deployer
-    type: hdb
-    path: gen/db
-    parameters:
-      buildpack: nodejs_buildpack
-    requires:
       - name: CAPMAPP-db
+
+  - name: CAPMAPP-mtx
+    type: nodejs
+    path: gen/mtx/sidecar
+    requires:
+      - name: CAPMAPP-auth
+      - name: CAPMAPP-db
+      - name: CAPMAPP-registry
+      - name: app-api
+        properties:
+          SUBSCRIPTION_URL: ~{app-protocol}://\${tenant_subdomain}-~{app-uri}
+    build-parameters:
+      builder: npm-ci
+    parameters:
+      instances: 1
+      memory: 256M
+      disk-quota: 512M
+    hooks:
+      - name: upgrade-all
+        type: task
+        phases:
+          - blue-green.application.before-start.idle
+          - deploy.application.before-start
+        parameters:
+          name: upgrade
+          memory: 512M # increase as required
+          disk-quota: 768M # increase as required
+          command: cds-mtx upgrade '*'
+    provides:
+      - name: mtx-api
+        properties:
+          mtx-url: ${default-url}
 
 resources:
-  - name: CAPMAPP-db
-    type: com.sap.xs.hdi-container
-    parameters:
-      service: hana
-      service-plan: hdi-shared
   - name: CAPMAPP-auth
     type: org.cloudfoundry.managed-service
     parameters:
@@ -70,11 +102,13 @@ resources:
       path: ./xs-security.json
       config:
         xsappname: CAPMAPP-${org}-${space}
-        tenant-mode: dedicated
+        tenant-mode: shared
         oauth2-configuration:
           credential-types:
             - "binding-secret"
             - "x509"
+          redirect-uris:
+            - https://*~{app-api/app-uri}/**
         role-collections:
           - name: 'Viewer (CAPMAPP ${org}-${space})'
             description: 'generated'
@@ -88,3 +122,30 @@ resources:
             description: 'generated'
             role-template-references:
               - '$XSAPPNAME.userattributes'
+    requires:
+      - name: app-api
+  - name: CAPMAPP-db
+    type: org.cloudfoundry.managed-service
+    parameters:
+      service: service-manager
+      service-plan: container
+  - name: CAPMAPP-registry
+    type: org.cloudfoundry.managed-service
+    requires:
+      - name: mtx-api
+    parameters:
+      service: saas-registry
+      service-plan: application
+      config:
+        xsappname: CAPMAPP-${org}-${space}
+        appName: CAPMAPP-${org}-${space}
+        displayName: CAPMAPP
+        description: A simple CAP project.
+        category: 'Category'
+        appUrls:
+          getDependencies: ~{mtx-api/mtx-url}/-/cds/saas-provisioning/dependencies
+          onSubscription: ~{mtx-api/mtx-url}/-/cds/saas-provisioning/tenant/{tenantId}
+          onSubscriptionAsync: true
+          onUnSubscriptionAsync: true
+          onUpdateDependenciesAsync: true
+          callbackTimeoutMillis: 300000 # Increase if your deployments are taking longer than that

@@ -46,7 +46,14 @@ service CatalogService @(path: 'CatalogService', requires: 'authenticated-user')
             TargetProperties: ['_aayush/GROSS_AMOUNT','_aayush/OVERALL_STATUS']
         }
 
-        action boost() returns PurchaseOrderSet
+        action boost() returns PurchaseOrderSet;
+
+        @Common.SideEffects: {
+            TargetProperties: ['OVERALL_STATUS']
+        }
+        action changeStatus();
+
+        action offerPrice();
     };
     entity PurchaseItemSet as projection on transaction.poitems;
     @readonly

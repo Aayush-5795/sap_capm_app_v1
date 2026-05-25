@@ -36,7 +36,17 @@ annotate service.PurchaseOrderSet with @(
             Action : 'CatalogService.boost',
             Label : 'boost',
             Inline : true,
-        }
+        },
+        {
+            $Type : 'UI.DataFieldForAction',
+            Action : 'CatalogService.changeStatus',
+            Label : 'Change Status',
+        },
+        {
+            $Type : 'UI.DataFieldForAction',
+            Action : 'CatalogService.offerPrice',
+            Label : '10% Offer',
+        },
     ],
     UI.HeaderInfo:{
         TypeName: 'Purchase Order',
@@ -69,6 +79,12 @@ annotate service.PurchaseOrderSet with @(
             ],
         },
         {
+            $Type : 'UI.ReferenceFacet',
+            Label : 'Amount of Items',
+            ID : 'AmountofItems',
+            Target : '@UI.FieldGroup#AmountofItems',
+        },
+        {
                     $Type : 'UI.ReferenceFacet',
                     Label   : 'Items',
                     Target : 'Items/@UI.LineItem'
@@ -78,7 +94,7 @@ annotate service.PurchaseOrderSet with @(
                     Label   : 'Google',
                     Target : 'https://www.google.com'
                     
-        }
+        },
         
     ],
     UI.Identification :[
@@ -128,7 +144,28 @@ annotate service.PurchaseOrderSet with @(
                 Value: LIFECYCLE_STATUS,
             }
         ]
-    }
+    },
+    UI.FieldGroup #AmountofItems : {
+        $Type : 'UI.FieldGroupType',
+        Data : [
+            {
+                $Type : 'UI.DataField',
+                Value : GROSS_AMOUNT,
+            },
+            {
+                $Type : 'UI.DataField',
+                Value : NET_AMOUNT,
+            },
+            {
+                $Type : 'UI.DataField',
+                Value : TAX_AMOUNT,
+            },
+            {
+                $Type : 'UI.DataField',
+                Value : OVERALL_STATUS,
+            },
+        ],
+    },
 );
 
 // Annotate for meaningful name 
@@ -225,7 +262,58 @@ annotate service.PurchaseItemSet with @(
         {
             $Type : 'UI.DataField',
             Value: CURRENCY_code
-        }
+        },
+        {
+            $Type : 'UI.DataField',
+            Value : PRODUCT_GUID.CATEGORY,
+            Label : 'CATEGORY',
+        },
+        {
+            $Type : 'UI.DataField',
+            Value : PRODUCT_GUID.CURRENCY_CODE,
+            Label : 'CURRENCY_CODE',
+        },
+        {
+            $Type : 'UI.DataField',
+            Value : PRODUCT_GUID.DEPTH,
+            Label : 'DEPTH',
+        },
+        {
+            $Type : 'UI.DataField',
+            Value : PRODUCT_GUID.DESCRIPTION,
+        },
+        {
+            $Type : 'UI.DataField',
+            Value : PRODUCT_GUID.DIM_UNIT,
+            Label : 'DIM_UNIT',
+        },
+        {
+            $Type : 'UI.DataField',
+            Value : PRODUCT_GUID.HEIGHT,
+            Label : 'HEIGHT',
+        },
+        {
+            $Type : 'UI.DataField',
+            Value : PRODUCT_GUID.MEASURE_UNIT,
+            Label : 'MEASURE_UNIT',
+        },
+        {
+            $Type : 'UI.DataField',
+            Value : PRODUCT_GUID.PRICE,
+            Label : 'PRICE',
+        },
+        {
+            $Type : 'UI.DataField',
+            Value : PRODUCT_GUID.texts.DESCRIPTION,
+            Label : 'DESCRIPTION',
+        },
+        {
+            $Type : 'UI.DataField',
+            Value : PRODUCT_GUID.texts.locale,
+            Label : 'locale',
+        },
+    ],
+    UI.LineItem #AmountInformation : [
     ],
     
 );
